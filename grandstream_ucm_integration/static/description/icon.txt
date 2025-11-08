@@ -1,0 +1,18 @@
+ICON PLACEHOLDER
+
+Please add an icon.png file (128x128 pixels) in this directory.
+
+Recommended icon design:
+- Include a phone symbol
+- Include the Grandstream or UCM logo (if licensed)
+- Use colors: Green (#00B050) and Blue (#0066CC)
+- PNG format, transparent background
+- Dimensions: 128x128 pixels
+
+You can create one using:
+- GIMP, Photoshop, or any image editor
+- Online icon generators
+- Font Awesome phone icon + company branding
+
+Once created, replace this file with:
+  icon.png (128x128)

@@ -1,0 +1,11 @@
+# Requirements for Grandstream UCM Integration Module
+
+# Core Odoo dependencies (already included with Odoo)
+# odoo>=17.0
+
+# Python dependencies
+requests>=2.31.0  # For API calls to Grandstream UCM
+
+# Note: These packages are typically already included in Odoo installation
+# If not, install them using:
+# pip install -r requirements.txt

@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_grandstream_config_user,grandstream.config.user,model_grandstream_config,base.group_user,1,0,0,0
+access_grandstream_config_manager,grandstream.config.manager,model_grandstream_config,base.group_system,1,1,1,1
+access_grandstream_call_log_user,grandstream.call.log.user,model_grandstream_call_log,base.group_user,1,1,1,0
+access_grandstream_call_log_manager,grandstream.call.log.manager,model_grandstream_call_log,base.group_system,1,1,1,1

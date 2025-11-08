@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Grandstream Config Tree View -->
+    <record id="view_grandstream_config_tree" model="ir.ui.view">
+        <field name="name">grandstream.config.tree</field>
+        <field name="model">grandstream.config</field>
+        <field name="arch" type="xml">
+            <tree string="Grandstream UCM Configurations">
+                <field name="ucm_name"/>
+                <field name="ucm_host"/>
+                <field name="ucm_port"/>
+                <field name="active" widget="boolean_toggle"/>
+                <field name="last_sync_date"/>
+                <field name="sync_interval"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Grandstream Config Form View -->
+    <record id="view_grandstream_config_form" model="ir.ui.view">
+        <field name="name">grandstream.config.form</field>
+        <field name="model">grandstream.config</field>
+        <field name="arch" type="xml">
+            <form string="Grandstream UCM Configuration">
+                <header>
+                    <button name="test_connection" type="object" string="Test Connection"
+                            class="oe_highlight"/>
+                    <button name="action_sync_calls" type="object" string="Sync Calls Now"
+                            class="oe_highlight" attrs="{'invisible': [('active', '=', False)]}"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-archive">
+                            <field name="active" widget="boolean_button" options='{"terminology": "archive"}'/>
+                        </button>
+                    </div>
+
+                    <group>
+                        <group name="connection" string="Connection Settings">
+                            <field name="ucm_name" placeholder="e.g., Main Office UCM"/>
+                            <field name="ucm_host" placeholder="192.168.1.100"/>
+                            <field name="ucm_port"/>
+                            <field name="use_https"/>
+                            <field name="username"/>
+                            <field name="password" password="True"/>
+                        </group>
+
+                        <group name="sync_settings" string="Sync Settings">
+                            <field name="sync_interval"/>
+                            <field name="days_to_sync"/>
+                            <field name="last_sync_date" readonly="1"/>
+                            <field name="call_recording_enabled"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group name="contact_settings" string="Contact Settings">
+                            <field name="auto_create_contacts"/>
+                            <field name="default_country_id"
+                                   attrs="{'invisible': [('auto_create_contacts', '=', False)]}"/>
+                        </group>
+                    </group>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Grandstream Config Action -->
+    <record id="action_grandstream_config" model="ir.actions.act_window">
+        <field name="name">UCM Configurations</field>
+        <field name="res_model">grandstream.config</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Configure your Grandstream UCM server
+            </p>
+            <p>
+                Set up the connection to your Grandstream UCM to start syncing call logs.
+            </p>
+        </field>
+    </record>
+
+</odoo>

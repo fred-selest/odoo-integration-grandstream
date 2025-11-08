@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Main Menu -->
+    <menuitem id="menu_grandstream_root"
+              name="Grandstream"
+              sequence="100"
+              web_icon="grandstream_ucm_integration,static/description/icon.png"/>
+
+    <!-- Call Logs Menu -->
+    <menuitem id="menu_grandstream_call_logs"
+              name="Call Logs"
+              parent="menu_grandstream_root"
+              action="action_grandstream_call_log"
+              sequence="10"/>
+
+    <!-- Configuration Menu -->
+    <menuitem id="menu_grandstream_configuration"
+              name="Configuration"
+              parent="menu_grandstream_root"
+              sequence="90"/>
+
+    <!-- UCM Configuration Menu -->
+    <menuitem id="menu_grandstream_ucm_config"
+              name="UCM Servers"
+              parent="menu_grandstream_configuration"
+              action="action_grandstream_config"
+              sequence="10"/>
+
+</odoo>
