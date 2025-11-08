@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Extend Partner Form View -->
+    <record id="view_partner_form_inherit_grandstream" model="ir.ui.view">
+        <field name="name">res.partner.form.inherit.grandstream</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Add Call Statistics Button -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_call_logs" type="object"
+                        class="oe_stat_button" icon="fa-phone"
+                        attrs="{'invisible': [('call_count', '=', 0)]}">
+                    <field name="call_count" widget="statinfo" string="Calls"/>
+                </button>
+            </xpath>
+
+            <!-- Add Call Statistics Tab -->
+            <xpath expr="//notebook" position="inside">
+                <page name="calls" string="Calls" attrs="{'invisible': [('call_count', '=', 0)]}">
+                    <group>
+                        <group name="call_stats" string="Call Statistics">
+                            <field name="call_count"/>
+                            <field name="inbound_call_count"/>
+                            <field name="outbound_call_count"/>
+                            <field name="missed_call_count"/>
+                        </group>
+                        <group name="call_info" string="Call Information">
+                            <field name="answered_call_count"/>
+                            <field name="total_talk_time_formatted"/>
+                            <field name="last_call_date"/>
+                        </group>
+                    </group>
+
+                    <separator string="Recent Calls"/>
+                    <field name="call_log_ids" nolabel="1" context="{'default_partner_id': active_id}">
+                        <tree string="Call History" default_order="call_date desc" limit="20">
+                            <field name="call_date"/>
+                            <field name="direction" widget="badge"
+                                   decoration-info="direction == 'inbound'"
+                                   decoration-success="direction == 'outbound'"
+                                   decoration-muted="direction == 'internal'"/>
+                            <field name="call_type" widget="badge"
+                                   decoration-success="call_type == 'answered'"
+                                   decoration-danger="call_type == 'missed'"
+                                   decoration-warning="call_type == 'voicemail'"
+                                   decoration-muted="call_type == 'busy'"/>
+                            <field name="caller_number"/>
+                            <field name="called_number"/>
+                            <field name="duration_formatted"/>
+                            <field name="has_recording" invisible="1"/>
+                            <field name="recording_file" widget="binary" filename="recording_filename"
+                                   attrs="{'invisible': [('has_recording', '=', False)]}"/>
+                            <field name="recording_filename" invisible="1"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>
