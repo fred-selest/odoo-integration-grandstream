@@ -1,0 +1,152 @@
+# Dolibarr language file - fr_FR - grandstreamucm
+# Copyright (C) 2024 Your Company
+
+#
+# Generic
+#
+ModuleGrandstreamUCMName = Intégration Grandstream UCM
+ModuleGrandstreamUCMDesc = Module d'intégration avec Grandstream UCM pour la gestion des appels téléphoniques
+
+#
+# Admin page
+#
+GrandstreamUCMSetup = Configuration Grandstream UCM
+GrandstreamUCMSetupPage = Page de configuration du module Grandstream UCM
+ConnectionSettings = Paramètres de connexion
+UCMHost = Hôte/IP du UCM
+UCMPort = Port API
+UseHTTPS = Utiliser HTTPS
+APIUsername = Nom d'utilisateur API
+APIPassword = Mot de passe API
+SyncSettings = Paramètres de synchronisation
+SyncInterval = Intervalle de synchronisation (minutes)
+DaysToSync = Jours à synchroniser
+DownloadRecordings = Télécharger les enregistrements
+AutoCreateContacts = Créer automatiquement les contacts
+LastSync = Dernière synchronisation
+TestConnection = Tester la connexion
+SyncNow = Synchroniser maintenant
+ConnectionSuccess = Connexion réussie !
+ConnectionFailed = Échec de la connexion
+SyncStarted = Synchronisation lancée
+SyncCompleted = Synchronisation terminée
+
+#
+# Call logs
+#
+CallLog = Journal d'appel
+CallLogs = Journaux d'appels
+NewCallLog = Nouveau journal d'appel
+CallID = ID d'appel
+CallDate = Date de l'appel
+CallerNumber = Numéro appelant
+CallerName = Nom appelant
+CalledNumber = Numéro appelé
+CalledName = Nom appelé
+Direction = Direction
+CallType = Type d'appel
+Duration = Durée
+TalkDuration = Durée de conversation
+Extension = Extension
+Trunk = Trunk
+Disposition = Disposition
+RecordingFile = Fichier d'enregistrement
+HasRecording = Avec enregistrement
+Notes = Notes
+CallDetails = Détails de l'appel
+CallHistory = Historique des appels
+RecentCalls = Appels récents
+ListOfCallLogs = Liste des journaux d'appels
+
+#
+# Directions
+#
+Inbound = Entrant
+Outbound = Sortant
+Internal = Interne
+
+#
+# Call types
+#
+Answered = Répondu
+Missed = Manqué
+Voicemail = Messagerie
+Busy = Occupé
+Failed = Échoué
+
+#
+# Statistics
+#
+Statistics = Statistiques
+CallStatistics = Statistiques d'appels
+TotalCalls = Total des appels
+InboundCalls = Appels entrants
+OutboundCalls = Appels sortants
+MissedCalls = Appels manqués
+AnsweredCalls = Appels répondus
+TotalTalkTime = Temps de conversation total
+LastCall = Dernier appel
+NoCallsFound = Aucun appel trouvé
+CallsForThirdParty = Appels pour ce tiers
+
+#
+# Third party tab
+#
+Calls = Appels
+CallsTab = Onglet appels
+ViewAllCalls = Voir tous les appels
+AddNote = Ajouter une note
+EditNote = Modifier la note
+NoteAdded = Note ajoutée
+NoteSaved = Note enregistrée
+
+#
+# Actions
+#
+DownloadRecording = Télécharger l'enregistrement
+PlayRecording = Écouter l'enregistrement
+ViewCall = Voir l'appel
+DeleteCall = Supprimer l'appel
+ConfirmDeleteCall = Êtes-vous sûr de vouloir supprimer cet appel ?
+
+#
+# Filters
+#
+FilterByDirection = Filtrer par direction
+FilterByType = Filtrer par type
+FilterByDate = Filtrer par date
+Today = Aujourd'hui
+Last7Days = 7 derniers jours
+Last30Days = 30 derniers jours
+AllCalls = Tous les appels
+WithRecording = Avec enregistrement
+WithoutRecording = Sans enregistrement
+
+#
+# Errors
+#
+ErrorCallNotFound = Appel non trouvé
+ErrorNoPermission = Vous n'avez pas la permission d'effectuer cette action
+ErrorSyncFailed = Échec de la synchronisation
+ErrorConnectionFailed = Échec de la connexion au serveur UCM
+ErrorInvalidCredentials = Identifiants invalides
+ErrorDownloadFailed = Échec du téléchargement de l'enregistrement
+
+#
+# Cron
+#
+CronSyncGrandstreamCalls = Synchroniser les appels Grandstream UCM
+CronSyncDescription = Synchronise les journaux d'appels depuis le serveur Grandstream UCM
+
+#
+# Widget
+#
+WidgetRecentCalls = Appels récents
+WidgetCallStats = Statistiques d'appels
+
+#
+# Contact creation
+#
+ContactCreated = Contact créé automatiquement
+AutoCreatedFromCall = Créé automatiquement depuis un appel Grandstream
+UnknownCaller = Appelant inconnu
