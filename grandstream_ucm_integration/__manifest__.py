@@ -43,6 +43,7 @@
         'views/grandstream_config_views.xml',
         'views/call_log_views.xml',
         'views/res_partner_views.xml',
+        'views/update_manager_views.xml',
         'views/menu_views.xml',
     ],
     'images': ['static/description/icon.png'],
