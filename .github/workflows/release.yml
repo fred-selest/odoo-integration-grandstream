@@ -1,0 +1,93 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Create Odoo module package
+        run: |
+          mkdir -p dist
+          cd grandstream_ucm_integration
+          # Update version in manifest
+          sed -i "s/'version': '[^']*'/'version': '17.0.${{ steps.get_version.outputs.VERSION }}'/" __manifest__.py
+          cd ..
+          zip -r dist/grandstream_ucm_integration_odoo_v${{ steps.get_version.outputs.VERSION }}.zip grandstream_ucm_integration
+
+      - name: Create Dolibarr module package
+        run: |
+          cd dolibarr_grandstreamucm
+          # Update version in module descriptor
+          sed -i "s/\$this->version = '[^']*'/\$this->version = '${{ steps.get_version.outputs.VERSION }}'/" core/modules/modGrandstreamUCM.class.php
+          # Update version in update manager
+          sed -i "s/public \$currentVersion = '[^']*'/public \$currentVersion = '${{ steps.get_version.outputs.VERSION }}'/" class/updatemanager.class.php
+          cd ..
+          zip -r dist/grandstream_ucm_dolibarr_v${{ steps.get_version.outputs.VERSION }}.zip dolibarr_grandstreamucm
+
+      - name: Create combined package
+        run: |
+          zip -r dist/grandstream_ucm_all_v${{ steps.get_version.outputs.VERSION }}.zip \
+            grandstream_ucm_integration \
+            dolibarr_grandstreamucm \
+            README.md \
+            CHANGELOG.md \
+            VERSION
+
+      - name: Extract release notes from CHANGELOG
+        id: changelog
+        run: |
+          VERSION=${{ steps.get_version.outputs.VERSION }}
+          # Extract notes for this version from CHANGELOG.md
+          NOTES=$(sed -n "/## \[${VERSION}\]/,/## \[/p" CHANGELOG.md | sed '1d;$d')
+          if [ -z "$NOTES" ]; then
+            NOTES="Release v${VERSION}"
+          fi
+          # Write to file for multiline support
+          echo "$NOTES" > release_notes.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Release v${{ steps.get_version.outputs.VERSION }}
+          body_path: release_notes.md
+          draft: false
+          prerelease: false
+          files: |
+            dist/grandstream_ucm_integration_odoo_v${{ steps.get_version.outputs.VERSION }}.zip
+            dist/grandstream_ucm_dolibarr_v${{ steps.get_version.outputs.VERSION }}.zip
+            dist/grandstream_ucm_all_v${{ steps.get_version.outputs.VERSION }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  notify:
+    name: Send Notifications
+    needs: release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get version
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Notification summary
+        run: |
+          echo "Release v${{ steps.get_version.outputs.VERSION }} has been created!"
+          echo "Packages created:"
+          echo "- Odoo module: grandstream_ucm_integration_odoo_v${{ steps.get_version.outputs.VERSION }}.zip"
+          echo "- Dolibarr module: grandstream_ucm_dolibarr_v${{ steps.get_version.outputs.VERSION }}.zip"
+          echo "- Combined: grandstream_ucm_all_v${{ steps.get_version.outputs.VERSION }}.zip"

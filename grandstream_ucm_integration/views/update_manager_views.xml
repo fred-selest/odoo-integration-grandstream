@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Update Manager Wizard Form View -->
+    <record id="view_grandstream_update_manager_form" model="ir.ui.view">
+        <field name="name">grandstream.update.manager.form</field>
+        <field name="model">grandstream.update.manager</field>
+        <field name="arch" type="xml">
+            <form string="Check for Updates">
+                <header>
+                    <button name="action_check_updates" type="object" string="Check for Updates"
+                            class="oe_highlight"
+                            attrs="{'invisible': [('state', 'not in', ['check', 'current', 'error'])]}"/>
+                    <button name="action_download_update" type="object" string="Download and Install"
+                            class="oe_highlight"
+                            attrs="{'invisible': [('state', '!=', 'available')]}"
+                            confirm="This will download and install the update. Make sure to backup your data. Continue?"/>
+                    <field name="state" widget="statusbar" statusbar_visible="check,available,downloading,installing,done"/>
+                </header>
+
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Grandstream UCM Integration</h1>
+                    </div>
+
+                    <group>
+                        <group name="version_info" string="Version Information">
+                            <field name="current_version"/>
+                            <field name="latest_version" attrs="{'invisible': [('state', '=', 'check')]}"/>
+                            <field name="release_date" attrs="{'invisible': [('state', '=', 'check')]}"/>
+                        </group>
+
+                        <group name="status" string="Status">
+                            <field name="update_available" widget="boolean"
+                                   attrs="{'invisible': [('state', 'in', ['check', 'error'])]}"/>
+                        </group>
+                    </group>
+
+                    <!-- Update Available Message -->
+                    <div class="alert alert-success" role="alert"
+                         attrs="{'invisible': [('state', '!=', 'available')]}">
+                        <strong>Update Available!</strong>
+                        A new version is available. Click "Download and Install" to update.
+                    </div>
+
+                    <!-- Up to Date Message -->
+                    <div class="alert alert-info" role="alert"
+                         attrs="{'invisible': [('state', '!=', 'current')]}">
+                        <strong>You're up to date!</strong>
+                        You have the latest version of Grandstream UCM Integration.
+                    </div>
+
+                    <!-- Downloading Message -->
+                    <div class="alert alert-warning" role="alert"
+                         attrs="{'invisible': [('state', '!=', 'downloading')]}">
+                        <strong>Downloading...</strong>
+                        Please wait while the update is being downloaded.
+                    </div>
+
+                    <!-- Installing Message -->
+                    <div class="alert alert-warning" role="alert"
+                         attrs="{'invisible': [('state', '!=', 'installing')]}">
+                        <strong>Installing...</strong>
+                        Please wait while the update is being installed.
+                    </div>
+
+                    <!-- Done Message -->
+                    <div class="alert alert-success" role="alert"
+                         attrs="{'invisible': [('state', '!=', 'done')]}">
+                        <strong>Update Complete!</strong>
+                        The module has been updated successfully. Please restart Odoo to apply changes.
+                    </div>
+
+                    <!-- Error Message -->
+                    <group attrs="{'invisible': [('state', '!=', 'error')]}">
+                        <div class="alert alert-danger" role="alert">
+                            <strong>Error!</strong>
+                            <field name="error_message" nolabel="1"/>
+                        </div>
+                    </group>
+
+                    <!-- Release Notes -->
+                    <group string="Release Notes" attrs="{'invisible': [('release_notes', '=', False)]}">
+                        <field name="release_notes" nolabel="1" readonly="1"/>
+                    </group>
+
+                </sheet>
+
+                <footer>
+                    <button string="Close" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Update Manager Action -->
+    <record id="action_grandstream_update_manager" model="ir.actions.act_window">
+        <field name="name">Check for Updates</field>
+        <field name="res_model">grandstream.update.manager</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_state': 'check'}</field>
+    </record>
+
+    <!-- Menu Item for Update Manager -->
+    <menuitem id="menu_grandstream_update"
+              name="Check for Updates"
+              parent="menu_grandstream_configuration"
+              action="action_grandstream_update_manager"
+              sequence="99"/>
+
+</odoo>
