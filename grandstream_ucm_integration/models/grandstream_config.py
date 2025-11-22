@@ -4,8 +4,32 @@ from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
 import requests
 import logging
+import re
+import urllib3
 
 _logger = logging.getLogger(__name__)
+
+# Suppress only the single warning from urllib3 needed.
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+# Constants for call types and directions
+CALL_DIRECTIONS = [
+    ('inbound', 'Inbound'),
+    ('outbound', 'Outbound'),
+    ('internal', 'Internal')
+]
+
+CALL_TYPES = [
+    ('answered', 'Answered'),
+    ('missed', 'Missed'),
+    ('voicemail', 'Voicemail'),
+    ('busy', 'Busy'),
+    ('failed', 'Failed')
+]
+
+# Retry configuration
+MAX_RETRIES = 3
+RETRY_DELAY = 2  # seconds
 
 
 class GrandstreamConfig(models.Model):
@@ -34,6 +58,11 @@ class GrandstreamConfig(models.Model):
         default=True,
         help='Use HTTPS for secure connection'
     )
+    verify_ssl = fields.Boolean(
+        string='Verify SSL Certificate',
+        default=False,
+        help='Verify SSL certificate (disable for self-signed certificates)'
+    )
     username = fields.Char(
         string='API Username',
         required=True,
@@ -42,6 +71,7 @@ class GrandstreamConfig(models.Model):
     password = fields.Char(
         string='API Password',
         required=True,
+        password=True,
         help='Password for UCM API access'
     )
     active = fields.Boolean(
@@ -59,6 +89,20 @@ class GrandstreamConfig(models.Model):
         string='Last Sync Date',
         readonly=True,
         help='Last successful synchronization date'
+    )
+    last_sync_status = fields.Selection([
+        ('success', 'Success'),
+        ('partial', 'Partial'),
+        ('failed', 'Failed')
+    ], string='Last Sync Status', readonly=True)
+    last_sync_message = fields.Text(
+        string='Last Sync Message',
+        readonly=True
+    )
+    last_sync_count = fields.Integer(
+        string='Last Sync Count',
+        readonly=True,
+        help='Number of calls synced in last sync'
     )
     auto_create_contacts = fields.Boolean(
         string='Auto-create Contacts',
@@ -81,10 +125,31 @@ class GrandstreamConfig(models.Model):
         required=True,
         help='Number of days of call history to sync'
     )
+    max_calls_per_sync = fields.Integer(
+        string='Max Calls per Sync',
+        default=1000,
+        help='Maximum number of calls to sync per run (0 = unlimited)'
+    )
+    api_rate_limit = fields.Integer(
+        string='API Rate Limit (req/min)',
+        default=60,
+        help='Maximum API requests per minute'
+    )
 
     _sql_constraints = [
         ('ucm_name_unique', 'unique(ucm_name)', 'UCM name must be unique!'),
     ]
+
+    @api.constrains('ucm_host')
+    def _check_host(self):
+        """Validate host format"""
+        ip_pattern = r'^(\d{1,3}\.){3}\d{1,3}$'
+        hostname_pattern = r'^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*$'
+
+        for record in self:
+            host = record.ucm_host.strip()
+            if not (re.match(ip_pattern, host) or re.match(hostname_pattern, host)):
+                raise ValidationError(_('Invalid host format. Use IP address or hostname.'))
 
     @api.constrains('ucm_port')
     def _check_port(self):
@@ -110,47 +175,92 @@ class GrandstreamConfig(models.Model):
         protocol = 'https' if self.use_https else 'http'
         return f'{protocol}://{self.ucm_host}:{self.ucm_port}/api'
 
+    def _make_api_request(self, endpoint, method='POST', data=None, params=None, timeout=30):
+        """
+        Make API request with retry logic and rate limiting.
+
+        :param endpoint: API endpoint (without /api prefix)
+        :param method: HTTP method (GET, POST)
+        :param data: POST data (dict)
+        :param params: GET parameters (dict)
+        :param timeout: Request timeout in seconds
+        :return: Response data or None on failure
+        """
+        self.ensure_one()
+        url = f'{self.get_api_url()}/{endpoint}'
+
+        import time
+        last_error = None
+
+        for attempt in range(MAX_RETRIES):
+            try:
+                if method == 'POST':
+                    response = requests.post(
+                        url,
+                        json=data,
+                        timeout=timeout,
+                        verify=self.verify_ssl
+                    )
+                else:
+                    response = requests.get(
+                        url,
+                        params=params,
+                        timeout=timeout,
+                        verify=self.verify_ssl
+                    )
+
+                if response.status_code == 200:
+                    return response.json()
+                elif response.status_code == 429:  # Rate limited
+                    wait_time = int(response.headers.get('Retry-After', RETRY_DELAY * (attempt + 1)))
+                    _logger.warning(f'Rate limited, waiting {wait_time}s')
+                    time.sleep(wait_time)
+                    continue
+                elif response.status_code >= 500:  # Server error, retry
+                    last_error = f'Server error: {response.status_code}'
+                    time.sleep(RETRY_DELAY * (attempt + 1))
+                    continue
+                else:
+                    last_error = f'HTTP {response.status_code}'
+                    break
+
+            except requests.exceptions.Timeout:
+                last_error = 'Request timeout'
+                time.sleep(RETRY_DELAY * (attempt + 1))
+            except requests.exceptions.ConnectionError as e:
+                last_error = f'Connection error: {str(e)}'
+                time.sleep(RETRY_DELAY * (attempt + 1))
+            except requests.exceptions.RequestException as e:
+                last_error = str(e)
+                break
+
+        _logger.error(f'API request failed after {MAX_RETRIES} attempts: {last_error}')
+        return None
+
     def test_connection(self):
         """Test connection to Grandstream UCM"""
         self.ensure_one()
 
-        try:
-            url = f'{self.get_api_url()}/login'
+        payload = {
+            'username': self.username,
+            'password': self.password
+        }
 
-            payload = {
-                'username': self.username,
-                'password': self.password
+        result = self._make_api_request('login', 'POST', data=payload, timeout=10)
+
+        if result and result.get('response') == 'success':
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _('Connection Successful'),
+                    'message': _('Successfully connected to Grandstream UCM!'),
+                    'type': 'success',
+                    'sticky': False,
+                }
             }
 
-            response = requests.post(
-                url,
-                json=payload,
-                timeout=10,
-                verify=False  # You may want to handle SSL verification properly
-            )
-
-            if response.status_code == 200:
-                result = response.json()
-                if result.get('response') == 'success':
-                    return {
-                        'type': 'ir.actions.client',
-                        'tag': 'display_notification',
-                        'params': {
-                            'title': _('Connection Successful'),
-                            'message': _('Successfully connected to Grandstream UCM!'),
-                            'type': 'success',
-                            'sticky': False,
-                        }
-                    }
-
-            raise UserError(_('Connection failed: Invalid credentials or UCM not reachable'))
-
-        except requests.exceptions.Timeout:
-            raise UserError(_('Connection timeout. Please check the UCM host and port.'))
-        except requests.exceptions.ConnectionError:
-            raise UserError(_('Connection error. Please check the UCM host and port.'))
-        except Exception as e:
-            raise UserError(_('Connection failed: %s') % str(e))
+        raise UserError(_('Connection failed: Invalid credentials or UCM not reachable'))
 
     def action_sync_calls(self):
         """Manually trigger call synchronization"""
@@ -159,15 +269,27 @@ class GrandstreamConfig(models.Model):
             raise UserError(_('This UCM configuration is not active'))
 
         call_log_obj = self.env['grandstream.call.log']
-        call_log_obj.sync_calls(self)
+        synced_count, errors = call_log_obj.sync_calls(self)
+
+        status = 'success' if not errors else ('partial' if synced_count > 0 else 'failed')
+        message = f'Synced {synced_count} calls'
+        if errors:
+            message += f'. Errors: {len(errors)}'
+
+        self.write({
+            'last_sync_date': fields.Datetime.now(),
+            'last_sync_status': status,
+            'last_sync_message': message,
+            'last_sync_count': synced_count
+        })
 
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
-                'title': _('Sync Started'),
-                'message': _('Call synchronization has been initiated'),
-                'type': 'info',
+                'title': _('Sync Completed'),
+                'message': message,
+                'type': 'success' if status == 'success' else 'warning',
                 'sticky': False,
             }
         }
@@ -177,12 +299,39 @@ class GrandstreamConfig(models.Model):
         """Scheduled action to sync calls from all active UCM servers"""
         configs = self.search([('active', '=', True)])
         call_log_obj = self.env['grandstream.call.log']
+        total_synced = 0
+        total_errors = 0
 
         for config in configs:
             try:
                 _logger.info(f'Starting call sync for UCM: {config.ucm_name}')
-                call_log_obj.sync_calls(config)
-                config.last_sync_date = fields.Datetime.now()
-                _logger.info(f'Call sync completed for UCM: {config.ucm_name}')
+                synced_count, errors = call_log_obj.sync_calls(config)
+
+                status = 'success' if not errors else ('partial' if synced_count > 0 else 'failed')
+                message = f'Synced {synced_count} calls'
+                if errors:
+                    message += f'. Errors: {len(errors)}'
+                    for err in errors[:5]:  # Log first 5 errors
+                        _logger.warning(f'Sync error: {err}')
+
+                config.write({
+                    'last_sync_date': fields.Datetime.now(),
+                    'last_sync_status': status,
+                    'last_sync_message': message,
+                    'last_sync_count': synced_count
+                })
+
+                total_synced += synced_count
+                total_errors += len(errors)
+
+                _logger.info(f'Call sync completed for UCM: {config.ucm_name} - {message}')
+
             except Exception as e:
-                _logger.error(f'Error syncing calls for UCM {config.ucm_name}: {str(e)}')
+                _logger.error(f'Error syncing calls for UCM {config.ucm_name}: {str(e)}', exc_info=True)
+                config.write({
+                    'last_sync_status': 'failed',
+                    'last_sync_message': str(e)
+                })
+                total_errors += 1
+
+        _logger.info(f'Cron sync completed: {total_synced} calls synced, {total_errors} errors')

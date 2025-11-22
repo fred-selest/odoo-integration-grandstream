@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!-- Module Category -->
+        <record id="module_category_grandstream" model="ir.module.category">
+            <field name="name">Grandstream UCM</field>
+            <field name="description">Grandstream UCM Integration Module</field>
+            <field name="sequence">50</field>
+        </record>
+
+        <!-- User Group: Basic User - Can view calls and add notes -->
+        <record id="group_grandstream_user" model="res.groups">
+            <field name="name">User</field>
+            <field name="category_id" ref="module_category_grandstream"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+            <field name="comment">Can view call logs, add notes, and see call statistics</field>
+        </record>
+
+        <!-- User Group: Manager - Can configure UCM and manage sync -->
+        <record id="group_grandstream_manager" model="res.groups">
+            <field name="name">Manager</field>
+            <field name="category_id" ref="module_category_grandstream"/>
+            <field name="implied_ids" eval="[(4, ref('group_grandstream_user'))]"/>
+            <field name="comment">Can configure UCM servers, manage synchronization, and delete call logs</field>
+        </record>
+
+    </data>
+
+    <data noupdate="1">
+
+        <!-- Record Rules: Users can only see calls in their company -->
+        <record id="grandstream_call_log_company_rule" model="ir.rule">
+            <field name="name">Grandstream Call Log: Multi-company</field>
+            <field name="model_id" ref="model_grandstream_call_log"/>
+            <field name="domain_force">[('ucm_config_id.company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+        <!-- Record Rules: Only managers can see/edit UCM configs -->
+        <record id="grandstream_config_manager_rule" model="ir.rule">
+            <field name="name">Grandstream Config: Manager Only</field>
+            <field name="model_id" ref="model_grandstream_config"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_grandstream_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+    </data>
+</odoo>

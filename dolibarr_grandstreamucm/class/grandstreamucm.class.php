@@ -502,10 +502,25 @@ class GrandstreamUCM
             dol_mkdir($dir);
         }
 
-        $filename = $callLog->call_id.'.wav';
+        // SECURITY: Sanitize filename to prevent path traversal
+        $safeCallId = $this->sanitizeFilename($callLog->call_id);
+        if (empty($safeCallId)) {
+            dol_syslog(__METHOD__.' Invalid call_id for filename', LOG_ERR);
+            return false;
+        }
+
+        $filename = $safeCallId.'.wav';
         $filepath = $dir.'/'.$filename;
 
-        $result = file_put_contents($filepath, $content);
+        // SECURITY: Verify the resolved path is within the target directory
+        $realDir = realpath($dir);
+        $realFilepath = $realDir.'/'.basename($filename);
+        if (strpos($realFilepath, $realDir) !== 0) {
+            dol_syslog(__METHOD__.' Path traversal attempt detected', LOG_ERR);
+            return false;
+        }
+
+        $result = file_put_contents($realFilepath, $content);
 
         if ($result !== false) {
             $callLog->recording_file = $filename;
@@ -514,6 +529,27 @@ class GrandstreamUCM
         }
 
         return false;
+    }
+
+    /**
+     * Sanitize filename to prevent path traversal
+     *
+     * @param string $filename Original filename
+     * @return string Sanitized filename
+     */
+    private function sanitizeFilename($filename)
+    {
+        // Remove any path components
+        $filename = basename($filename);
+        // Remove dangerous characters
+        $filename = preg_replace('/[^a-zA-Z0-9_\-\.]/', '_', $filename);
+        // Remove multiple dots (prevent .htaccess tricks)
+        $filename = preg_replace('/\.+/', '.', $filename);
+        // Limit length
+        if (strlen($filename) > 100) {
+            $filename = substr($filename, 0, 100);
+        }
+        return $filename;
     }
 
     /**
