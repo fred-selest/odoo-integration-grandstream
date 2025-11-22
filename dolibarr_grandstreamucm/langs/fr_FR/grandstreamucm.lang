@@ -150,3 +150,25 @@ WidgetCallStats = Statistiques d'appels
 ContactCreated = Contact créé automatiquement
 AutoCreatedFromCall = Créé automatiquement depuis un appel Grandstream
 UnknownCaller = Appelant inconnu
+
+#
+# Updates
+#
+Updates = Mises à jour
+CheckForUpdates = Vérifier les mises à jour
+CurrentVersion = Version actuelle
+LatestVersion = Dernière version
+UpdateAvailable = Mise à jour disponible
+NoUpdateAvailable = Aucune mise à jour disponible
+ReleaseNotes = Notes de version
+DownloadAndInstall = Télécharger et installer
+UpdateInProgress = Mise à jour en cours...
+UpdateSuccess = Mise à jour réussie
+UpdateFailed = Échec de la mise à jour
+RestartRequired = Redémarrage nécessaire pour appliquer la mise à jour
+BackupCreated = Sauvegarde créée
+LastCheckDate = Dernière vérification
+CheckingForUpdates = Vérification des mises à jour en cours...
+DownloadingUpdate = Téléchargement de la mise à jour...
+InstallingUpdate = Installation de la mise à jour...
+VerifyingUpdate = Vérification de la mise à jour...

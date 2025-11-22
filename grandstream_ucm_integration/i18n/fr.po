@@ -1,0 +1,517 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* grandstream_ucm_integration
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-01-01 00:00+0000\n"
+"PO-Revision-Date: 2024-01-01 00:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: French\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#. module: grandstream_ucm_integration
+#: model:ir.module.category,name:grandstream_ucm_integration.module_category_grandstream
+msgid "Grandstream UCM"
+msgstr "Grandstream UCM"
+
+#. module: grandstream_ucm_integration
+#: model:res.groups,name:grandstream_ucm_integration.group_grandstream_user
+msgid "User"
+msgstr "Utilisateur"
+
+#. module: grandstream_ucm_integration
+#: model:res.groups,name:grandstream_ucm_integration.group_grandstream_manager
+msgid "Manager"
+msgstr "Responsable"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model,name:grandstream_ucm_integration.model_grandstream_config
+msgid "Grandstream UCM Configuration"
+msgstr "Configuration Grandstream UCM"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model,name:grandstream_ucm_integration.model_grandstream_call_log
+msgid "Grandstream Call Log"
+msgstr "Journal d'appels Grandstream"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_config__ucm_name
+msgid "UCM Name"
+msgstr "Nom du UCM"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_config__ucm_host
+msgid "UCM Host/IP"
+msgstr "Hôte/IP du UCM"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_config__ucm_port
+msgid "UCM Port"
+msgstr "Port UCM"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_config__use_https
+msgid "Use HTTPS"
+msgstr "Utiliser HTTPS"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_config__verify_ssl
+msgid "Verify SSL Certificate"
+msgstr "Vérifier le certificat SSL"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_config__username
+msgid "API Username"
+msgstr "Nom d'utilisateur API"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_config__password
+msgid "API Password"
+msgstr "Mot de passe API"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_config__active
+msgid "Active"
+msgstr "Actif"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_config__sync_interval
+msgid "Sync Interval (minutes)"
+msgstr "Intervalle de synchronisation (minutes)"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_config__last_sync_date
+msgid "Last Sync Date"
+msgstr "Date de dernière synchronisation"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_config__last_sync_status
+msgid "Last Sync Status"
+msgstr "Statut de dernière synchronisation"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_config__last_sync_message
+msgid "Last Sync Message"
+msgstr "Message de dernière synchronisation"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_config__last_sync_count
+msgid "Last Sync Count"
+msgstr "Nombre d'appels synchronisés"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_config__auto_create_contacts
+msgid "Auto-create Contacts"
+msgstr "Création automatique des contacts"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_config__default_country_id
+msgid "Default Country"
+msgstr "Pays par défaut"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_config__call_recording_enabled
+msgid "Download Call Recordings"
+msgstr "Télécharger les enregistrements"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_config__days_to_sync
+msgid "Days to Sync"
+msgstr "Jours à synchroniser"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_config__max_calls_per_sync
+msgid "Max Calls per Sync"
+msgstr "Maximum d'appels par synchronisation"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_config__api_rate_limit
+msgid "API Rate Limit (req/min)"
+msgstr "Limite de requêtes API (req/min)"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_call_log__name
+msgid "Reference"
+msgstr "Référence"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_call_log__call_id
+msgid "Call ID"
+msgstr "ID d'appel"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_call_log__call_date
+msgid "Call Date"
+msgstr "Date de l'appel"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_call_log__caller_number
+msgid "Caller Number"
+msgstr "Numéro appelant"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_call_log__caller_name
+msgid "Caller Name"
+msgstr "Nom appelant"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_call_log__called_number
+msgid "Called Number"
+msgstr "Numéro appelé"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_call_log__called_name
+msgid "Called Name"
+msgstr "Nom appelé"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_call_log__direction
+msgid "Direction"
+msgstr "Direction"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_call_log__call_type
+msgid "Call Type"
+msgstr "Type d'appel"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_call_log__duration
+msgid "Duration (seconds)"
+msgstr "Durée (secondes)"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_call_log__talk_duration
+msgid "Talk Duration (seconds)"
+msgstr "Durée de conversation (secondes)"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_call_log__extension
+msgid "Extension"
+msgstr "Extension"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_call_log__trunk
+msgid "Trunk"
+msgstr "Trunk"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_call_log__disposition
+msgid "Disposition"
+msgstr "Disposition"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_call_log__recording_file
+msgid "Recording File"
+msgstr "Fichier d'enregistrement"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_call_log__recording_data
+msgid "Recording"
+msgstr "Enregistrement"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_call_log__has_recording
+msgid "Has Recording"
+msgstr "Avec enregistrement"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_call_log__notes
+msgid "Notes"
+msgstr "Notes"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_call_log__partner_id
+msgid "Contact"
+msgstr "Contact"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_call_log__ucm_config_id
+msgid "UCM Server"
+msgstr "Serveur UCM"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_res_partner__call_log_ids
+msgid "Call Logs"
+msgstr "Journaux d'appels"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_res_partner__call_count
+msgid "Total Calls"
+msgstr "Total des appels"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_res_partner__inbound_call_count
+msgid "Inbound Calls"
+msgstr "Appels entrants"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_res_partner__outbound_call_count
+msgid "Outbound Calls"
+msgstr "Appels sortants"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_res_partner__missed_call_count
+msgid "Missed Calls"
+msgstr "Appels manqués"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_res_partner__answered_call_count
+msgid "Answered Calls"
+msgstr "Appels répondus"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_res_partner__total_talk_time
+msgid "Total Talk Time (seconds)"
+msgstr "Temps de conversation total (secondes)"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_res_partner__total_talk_time_formatted
+msgid "Total Talk Time"
+msgstr "Temps de conversation total"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_res_partner__last_call_date
+msgid "Last Call"
+msgstr "Dernier appel"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields.selection,name:grandstream_ucm_integration.selection__grandstream_call_log__direction__inbound
+msgid "Inbound"
+msgstr "Entrant"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields.selection,name:grandstream_ucm_integration.selection__grandstream_call_log__direction__outbound
+msgid "Outbound"
+msgstr "Sortant"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields.selection,name:grandstream_ucm_integration.selection__grandstream_call_log__direction__internal
+msgid "Internal"
+msgstr "Interne"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields.selection,name:grandstream_ucm_integration.selection__grandstream_call_log__call_type__answered
+msgid "Answered"
+msgstr "Répondu"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields.selection,name:grandstream_ucm_integration.selection__grandstream_call_log__call_type__missed
+msgid "Missed"
+msgstr "Manqué"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields.selection,name:grandstream_ucm_integration.selection__grandstream_call_log__call_type__voicemail
+msgid "Voicemail"
+msgstr "Messagerie"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields.selection,name:grandstream_ucm_integration.selection__grandstream_call_log__call_type__busy
+msgid "Busy"
+msgstr "Occupé"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields.selection,name:grandstream_ucm_integration.selection__grandstream_call_log__call_type__failed
+msgid "Failed"
+msgstr "Échoué"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields.selection,name:grandstream_ucm_integration.selection__grandstream_config__last_sync_status__success
+msgid "Success"
+msgstr "Succès"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields.selection,name:grandstream_ucm_integration.selection__grandstream_config__last_sync_status__partial
+msgid "Partial"
+msgstr "Partiel"
+
+#. module: grandstream_ucm_integration
+#: model_terms:ir.ui.view,arch_db:grandstream_ucm_integration.view_grandstream_config_form
+msgid "Connection Settings"
+msgstr "Paramètres de connexion"
+
+#. module: grandstream_ucm_integration
+#: model_terms:ir.ui.view,arch_db:grandstream_ucm_integration.view_grandstream_config_form
+msgid "Synchronization Settings"
+msgstr "Paramètres de synchronisation"
+
+#. module: grandstream_ucm_integration
+#: model_terms:ir.ui.view,arch_db:grandstream_ucm_integration.view_grandstream_config_form
+msgid "Test Connection"
+msgstr "Tester la connexion"
+
+#. module: grandstream_ucm_integration
+#: model_terms:ir.ui.view,arch_db:grandstream_ucm_integration.view_grandstream_config_form
+msgid "Sync Now"
+msgstr "Synchroniser maintenant"
+
+#. module: grandstream_ucm_integration
+#: model_terms:ir.ui.view,arch_db:grandstream_ucm_integration.view_grandstream_config_form
+msgid "Synchronization Status"
+msgstr "Statut de synchronisation"
+
+#. module: grandstream_ucm_integration
+#: model:ir.ui.menu,name:grandstream_ucm_integration.menu_grandstream_root
+msgid "Grandstream UCM"
+msgstr "Grandstream UCM"
+
+#. module: grandstream_ucm_integration
+#: model:ir.ui.menu,name:grandstream_ucm_integration.menu_grandstream_calls
+msgid "Calls"
+msgstr "Appels"
+
+#. module: grandstream_ucm_integration
+#: model:ir.ui.menu,name:grandstream_ucm_integration.menu_grandstream_config
+msgid "Configuration"
+msgstr "Configuration"
+
+#. module: grandstream_ucm_integration
+#: model:ir.ui.menu,name:grandstream_ucm_integration.menu_call_log
+msgid "Call Logs"
+msgstr "Journaux d'appels"
+
+#. module: grandstream_ucm_integration
+#: model:ir.ui.menu,name:grandstream_ucm_integration.menu_grandstream_ucm_config
+msgid "UCM Servers"
+msgstr "Serveurs UCM"
+
+#. module: grandstream_ucm_integration
+#: model:ir.actions.act_window,name:grandstream_ucm_integration.action_call_log
+msgid "Call Logs"
+msgstr "Journaux d'appels"
+
+#. module: grandstream_ucm_integration
+#: model:ir.actions.act_window,name:grandstream_ucm_integration.action_grandstream_config
+msgid "UCM Servers"
+msgstr "Serveurs UCM"
+
+#. module: grandstream_ucm_integration
+#: code:addons/grandstream_ucm_integration/models/grandstream_config.py:0
+#, python-format
+msgid "Connection Successful"
+msgstr "Connexion réussie"
+
+#. module: grandstream_ucm_integration
+#: code:addons/grandstream_ucm_integration/models/grandstream_config.py:0
+#, python-format
+msgid "Successfully connected to Grandstream UCM!"
+msgstr "Connexion au Grandstream UCM réussie !"
+
+#. module: grandstream_ucm_integration
+#: code:addons/grandstream_ucm_integration/models/grandstream_config.py:0
+#, python-format
+msgid "Connection failed: Invalid credentials or UCM not reachable"
+msgstr "Échec de la connexion : Identifiants invalides ou UCM non accessible"
+
+#. module: grandstream_ucm_integration
+#: code:addons/grandstream_ucm_integration/models/grandstream_config.py:0
+#, python-format
+msgid "This UCM configuration is not active"
+msgstr "Cette configuration UCM n'est pas active"
+
+#. module: grandstream_ucm_integration
+#: code:addons/grandstream_ucm_integration/models/grandstream_config.py:0
+#, python-format
+msgid "Sync Completed"
+msgstr "Synchronisation terminée"
+
+#. module: grandstream_ucm_integration
+#: code:addons/grandstream_ucm_integration/models/grandstream_config.py:0
+#, python-format
+msgid "Invalid host format. Use IP address or hostname."
+msgstr "Format d'hôte invalide. Utilisez une adresse IP ou un nom d'hôte."
+
+#. module: grandstream_ucm_integration
+#: code:addons/grandstream_ucm_integration/models/grandstream_config.py:0
+#, python-format
+msgid "Port must be between 1 and 65535"
+msgstr "Le port doit être entre 1 et 65535"
+
+#. module: grandstream_ucm_integration
+#: code:addons/grandstream_ucm_integration/models/grandstream_config.py:0
+#, python-format
+msgid "Sync interval must be at least 1 minute"
+msgstr "L'intervalle de synchronisation doit être d'au moins 1 minute"
+
+#. module: grandstream_ucm_integration
+#: code:addons/grandstream_ucm_integration/models/grandstream_config.py:0
+#, python-format
+msgid "Days to sync must be at least 1"
+msgstr "Le nombre de jours à synchroniser doit être d'au moins 1"
+
+#. module: grandstream_ucm_integration
+#: model:ir.cron,name:grandstream_ucm_integration.ir_cron_grandstream_sync
+msgid "Grandstream: Sync Calls"
+msgstr "Grandstream : Synchroniser les appels"
+
+#. module: grandstream_ucm_integration
+#: model:ir.cron,name:grandstream_ucm_integration.ir_cron_grandstream_check_updates
+msgid "Grandstream: Check for Updates"
+msgstr "Grandstream : Vérifier les mises à jour"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model,name:grandstream_ucm_integration.model_grandstream_update_manager
+msgid "Grandstream Update Manager"
+msgstr "Gestionnaire de mises à jour Grandstream"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_update_manager__current_version
+msgid "Current Version"
+msgstr "Version actuelle"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_update_manager__latest_version
+msgid "Latest Version"
+msgstr "Dernière version"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_update_manager__update_available
+msgid "Update Available"
+msgstr "Mise à jour disponible"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_update_manager__release_notes
+msgid "Release Notes"
+msgstr "Notes de version"
+
+#. module: grandstream_ucm_integration
+#: model:ir.model.fields,field_description:grandstream_ucm_integration.field_grandstream_update_manager__last_check_date
+msgid "Last Check Date"
+msgstr "Date de dernière vérification"
+
+#. module: grandstream_ucm_integration
+#: model:ir.actions.act_window,name:grandstream_ucm_integration.action_update_manager
+msgid "Check for Updates"
+msgstr "Vérifier les mises à jour"
+
+#. module: grandstream_ucm_integration
+#: model_terms:ir.ui.view,arch_db:grandstream_ucm_integration.view_update_manager_form
+msgid "Check for Updates"
+msgstr "Vérifier les mises à jour"
+
+#. module: grandstream_ucm_integration
+#: model_terms:ir.ui.view,arch_db:grandstream_ucm_integration.view_update_manager_form
+msgid "Download and Install"
+msgstr "Télécharger et installer"
+
+#. module: grandstream_ucm_integration
+#: model_terms:ir.ui.view,arch_db:grandstream_ucm_integration.view_res_partner_form_inherit
+msgid "Call Statistics"
+msgstr "Statistiques d'appels"
+
+#. module: grandstream_ucm_integration
+#: model_terms:ir.ui.view,arch_db:grandstream_ucm_integration.view_res_partner_form_inherit
+msgid "View Calls"
+msgstr "Voir les appels"
+
+#. module: grandstream_ucm_integration
+#: code:addons/grandstream_ucm_integration/models/res_partner.py:0
+#, python-format
+msgid "Call Logs"
+msgstr "Journaux d'appels"

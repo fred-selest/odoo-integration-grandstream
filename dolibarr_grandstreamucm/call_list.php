@@ -321,12 +321,14 @@ while ($i < min($num, $limit)) {
     // Duration
     print '<td class="right nowraponall">'.$calllog->getFormattedDuration().'</td>';
 
-    // Third party
+    // Third party - Use pre-joined data to avoid N+1 query
     print '<td class="tdoverflowmax150">';
-    if ($obj->fk_soc > 0) {
-        $societe = new Societe($db);
-        $societe->fetch($obj->fk_soc);
-        print $societe->getNomUrl(1);
+    if ($obj->fk_soc > 0 && !empty($obj->socname)) {
+        // Create link without fetching (already have the name from JOIN)
+        print '<a href="'.DOL_URL_ROOT.'/societe/card.php?socid='.$obj->fk_soc.'">';
+        print img_picto('', 'company', 'class="paddingright pictofixedwidth"');
+        print dol_escape_htmltag(dol_trunc($obj->socname, 30));
+        print '</a>';
     }
     print '</td>';
 

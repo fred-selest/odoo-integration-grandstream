@@ -205,20 +205,28 @@ class CallLog extends CommonObject
         $sql .= " FROM ".MAIN_DB_PREFIX.$this->table_element." as t";
         $sql .= " WHERE t.entity IN (".getEntity($this->element).")";
 
-        // Manage filter
+        // Manage filter - SECURITY: Only allow whitelisted keys
+        $allowedFilterKeys = array('t.rowid', 't.fk_soc', 't.fk_socpeople', 't.direction', 't.call_type', 't.call_date');
         $sqlwhere = array();
         if (count($filter) > 0) {
             foreach ($filter as $key => $value) {
-                if ($key == 't.rowid') {
+                // SECURITY: Skip customsql and non-whitelisted keys to prevent SQL injection
+                if ($key == 'customsql' || !in_array($key, $allowedFilterKeys)) {
+                    dol_syslog(__METHOD__.' Skipping unauthorized filter key: '.$key, LOG_WARNING);
+                    continue;
+                }
+
+                if ($key == 't.rowid' || $key == 't.fk_soc' || $key == 't.fk_socpeople') {
                     $sqlwhere[] = $key." = ".intval($value);
-                } elseif (in_array($this->fields[$key]['type'], array('date', 'datetime', 'timestamp'))) {
+                } elseif (isset($this->fields[str_replace('t.', '', $key)]) && in_array($this->fields[str_replace('t.', '', $key)]['type'], array('date', 'datetime', 'timestamp'))) {
                     $sqlwhere[] = $key." = '".$this->db->idate($value)."'";
-                } elseif ($key == 'customsql') {
-                    $sqlwhere[] = $value;
                 } elseif (strpos($value, '%') === false) {
-                    $sqlwhere[] = $key." IN (".$this->db->sanitize($this->db->escape($value)).")";
+                    // Escape special SQL LIKE characters
+                    $escapedValue = $this->db->escape(str_replace(array('_', '%'), array('\\_', '\\%'), $value));
+                    $sqlwhere[] = $key." = '".$escapedValue."'";
                 } else {
-                    $sqlwhere[] = $key." LIKE '%".$this->db->escape($value)."%'";
+                    $escapedValue = $this->db->escape(str_replace(array('_', '%'), array('\\_', '\\%'), $value));
+                    $sqlwhere[] = $key." LIKE '%".$escapedValue."%' ESCAPE '\\\\'";
                 }
             }
         }

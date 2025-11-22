@@ -38,6 +38,7 @@
         'python': ['requests'],
     },
     'data': [
+        'security/grandstream_security.xml',
         'security/ir.model.access.csv',
         'data/ir_cron.xml',
         'views/grandstream_config_views.xml',

@@ -143,20 +143,40 @@ print '<th class="right">'.$langs->trans("Duration").'</th>';
 print '<th>'.$langs->trans("ThirdParty").'</th>';
 print '</tr>';
 
-// Fetch recent calls
-$calls = $calllog->fetchAll('DESC', 'call_date', 10);
+// Fetch recent calls with optimized query (avoid N+1)
+$sql = "SELECT t.rowid, t.ref, t.call_date, t.caller_number, t.called_number,";
+$sql .= " t.direction, t.call_type, t.duration, t.talk_duration, t.fk_soc,";
+$sql .= " s.nom as socname";
+$sql .= " FROM ".MAIN_DB_PREFIX."grandstreamucm_calllog as t";
+$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON t.fk_soc = s.rowid";
+$sql .= " WHERE t.entity IN (".getEntity('calllog').")";
+$sql .= " ORDER BY t.call_date DESC";
+$sql .= $db->plimit(10, 0);
 
-if (is_array($calls) && count($calls) > 0) {
-    foreach ($calls as $call) {
+$resql = $db->query($sql);
+$numCalls = $resql ? $db->num_rows($resql) : 0;
+
+if ($numCalls > 0) {
+    $i = 0;
+    while ($i < $numCalls) {
+        $obj = $db->fetch_object($resql);
+
+        // Create CallLog for helper methods
+        $call = new CallLog($db);
+        $call->direction = $obj->direction;
+        $call->call_type = $obj->call_type;
+        $call->duration = $obj->duration;
+        $call->talk_duration = $obj->talk_duration;
+
         print '<tr class="oddeven">';
 
         // Ref
         print '<td class="nowraponall">';
-        print '<a href="'.dol_buildpath('/grandstreamucm/call_card.php', 1).'?id='.$call->id.'">'.$call->ref.'</a>';
+        print '<a href="'.dol_buildpath('/grandstreamucm/call_card.php', 1).'?id='.$obj->rowid.'">'.dol_escape_htmltag($obj->ref).'</a>';
         print '</td>';
 
         // Date
-        print '<td class="center nowraponall">'.dol_print_date($db->jdate($call->call_date), 'dayhour').'</td>';
+        print '<td class="center nowraponall">'.dol_print_date($db->jdate($obj->call_date), 'dayhour').'</td>';
 
         // Direction
         print '<td>'.$call->getDirectionBadge().'</td>';
@@ -165,25 +185,28 @@ if (is_array($calls) && count($calls) > 0) {
         print '<td>'.$call->getCallTypeBadge().'</td>';
 
         // Caller
-        print '<td class="tdoverflowmax100">'.dol_escape_htmltag($call->caller_number).'</td>';
+        print '<td class="tdoverflowmax100">'.dol_escape_htmltag($obj->caller_number).'</td>';
 
         // Called
-        print '<td class="tdoverflowmax100">'.dol_escape_htmltag($call->called_number).'</td>';
+        print '<td class="tdoverflowmax100">'.dol_escape_htmltag($obj->called_number).'</td>';
 
         // Duration
         print '<td class="right nowraponall">'.$call->getFormattedDuration().'</td>';
 
-        // Third party
+        // Third party - Use pre-joined data
         print '<td class="tdoverflowmax150">';
-        if ($call->fk_soc > 0) {
-            $societe = new Societe($db);
-            $societe->fetch($call->fk_soc);
-            print $societe->getNomUrl(1);
+        if ($obj->fk_soc > 0 && !empty($obj->socname)) {
+            print '<a href="'.DOL_URL_ROOT.'/societe/card.php?socid='.$obj->fk_soc.'">';
+            print img_picto('', 'company', 'class="paddingright pictofixedwidth"');
+            print dol_escape_htmltag(dol_trunc($obj->socname, 30));
+            print '</a>';
         }
         print '</td>';
 
         print '</tr>';
+        $i++;
     }
+    $db->free($resql);
 } else {
     print '<tr class="oddeven"><td colspan="8" class="opacitymedium">'.$langs->trans("NoCallsFound").'</td></tr>';
 }

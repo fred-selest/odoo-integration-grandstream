@@ -6,13 +6,17 @@
         <field name="name">grandstream.config.tree</field>
         <field name="model">grandstream.config</field>
         <field name="arch" type="xml">
-            <tree string="Grandstream UCM Configurations">
+            <tree string="Configurations Grandstream UCM">
                 <field name="ucm_name"/>
                 <field name="ucm_host"/>
                 <field name="ucm_port"/>
                 <field name="active" widget="boolean_toggle"/>
                 <field name="last_sync_date"/>
-                <field name="sync_interval"/>
+                <field name="last_sync_status" widget="badge"
+                       decoration-success="last_sync_status == 'success'"
+                       decoration-warning="last_sync_status == 'partial'"
+                       decoration-danger="last_sync_status == 'failed'"/>
+                <field name="last_sync_count"/>
             </tree>
         </field>
     </record>
@@ -22,12 +26,13 @@
         <field name="name">grandstream.config.form</field>
         <field name="model">grandstream.config</field>
         <field name="arch" type="xml">
-            <form string="Grandstream UCM Configuration">
+            <form string="Configuration Grandstream UCM">
                 <header>
-                    <button name="test_connection" type="object" string="Test Connection"
-                            class="oe_highlight"/>
-                    <button name="action_sync_calls" type="object" string="Sync Calls Now"
-                            class="oe_highlight" attrs="{'invisible': [('active', '=', False)]}"/>
+                    <button name="test_connection" type="object" string="Tester la connexion"
+                            class="oe_highlight" icon="fa-plug"/>
+                    <button name="action_sync_calls" type="object" string="Synchroniser maintenant"
+                            class="oe_highlight" icon="fa-refresh"
+                            attrs="{'invisible': [('active', '=', False)]}"/>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
@@ -36,31 +41,150 @@
                         </button>
                     </div>
 
+                    <widget name="web_ribbon" title="Archivé" bg_color="bg-danger"
+                            attrs="{'invisible': [('active', '=', True)]}"/>
+
+                    <div class="oe_title">
+                        <label for="ucm_name"/>
+                        <h1>
+                            <field name="ucm_name" placeholder="Ex: UCM Bureau Principal"/>
+                        </h1>
+                    </div>
+
+                    <!-- Aide de configuration -->
+                    <div class="alert alert-info" role="alert">
+                        <strong><i class="fa fa-info-circle"/> Guide de configuration :</strong>
+                        <ol class="mb-0 mt-2">
+                            <li>Connectez-vous à l'interface web de votre UCM (ex: https://192.168.1.100:8089)</li>
+                            <li>Allez dans <strong>Valeur &gt; CDR &gt; CDR API</strong> et activez l'API</li>
+                            <li>Créez un utilisateur API dans <strong>Maintenance &gt; Utilisateur API</strong></li>
+                            <li>Renseignez les informations ci-dessous puis cliquez sur "Tester la connexion"</li>
+                        </ol>
+                    </div>
+
                     <group>
-                        <group name="connection" string="Connection Settings">
-                            <field name="ucm_name" placeholder="e.g., Main Office UCM"/>
-                            <field name="ucm_host" placeholder="192.168.1.100"/>
-                            <field name="ucm_port"/>
-                            <field name="use_https"/>
-                            <field name="username"/>
-                            <field name="password" password="True"/>
+                        <group name="connection" string="Paramètres de connexion">
+                            <field name="ucm_host"
+                                   placeholder="Ex: 192.168.1.100 ou ucm.monentreprise.com"
+                                   help="Adresse IP ou nom d'hôte de votre Grandstream UCM. Exemples : 192.168.1.100, 10.0.0.50, ucm.example.com"/>
+                            <field name="ucm_port"
+                                   help="Port API du UCM. Par défaut : 8089 pour HTTPS, 8088 pour HTTP"/>
+                            <field name="use_https"
+                                   help="Activez HTTPS pour une connexion sécurisée (recommandé)"/>
+                            <field name="verify_ssl"
+                                   help="Désactivez si votre UCM utilise un certificat auto-signé (courant en entreprise)"
+                                   attrs="{'invisible': [('use_https', '=', False)]}"/>
+                            <field name="username"
+                                   placeholder="Ex: api_user"
+                                   help="Nom d'utilisateur API créé dans le UCM (Maintenance > Utilisateur API)"/>
+                            <field name="password" password="True"
+                                   placeholder="Mot de passe de l'utilisateur API"
+                                   help="Mot de passe de l'utilisateur API"/>
                         </group>
 
-                        <group name="sync_settings" string="Sync Settings">
-                            <field name="sync_interval"/>
-                            <field name="days_to_sync"/>
-                            <field name="last_sync_date" readonly="1"/>
-                            <field name="call_recording_enabled"/>
+                        <group name="sync_settings" string="Paramètres de synchronisation">
+                            <field name="sync_interval"
+                                   help="Intervalle entre les synchronisations automatiques. Exemple : 15 = vérification toutes les 15 minutes"/>
+                            <field name="days_to_sync"
+                                   help="Nombre de jours d'historique à récupérer. Exemple : 30 = appels des 30 derniers jours"/>
+                            <field name="max_calls_per_sync"
+                                   help="Limite le nombre d'appels par synchronisation pour éviter les timeouts. 0 = pas de limite"/>
+                            <field name="call_recording_enabled"
+                                   help="Télécharge automatiquement les enregistrements d'appels (nécessite plus d'espace disque)"/>
+                            <field name="api_rate_limit"
+                                   help="Limite de requêtes API par minute pour éviter de surcharger le UCM"/>
                         </group>
                     </group>
 
                     <group>
-                        <group name="contact_settings" string="Contact Settings">
-                            <field name="auto_create_contacts"/>
+                        <group name="contact_settings" string="Paramètres des contacts">
+                            <field name="auto_create_contacts"
+                                   help="Crée automatiquement un contact pour chaque numéro inconnu"/>
                             <field name="default_country_id"
-                                   attrs="{'invisible': [('auto_create_contacts', '=', False)]}"/>
+                                   placeholder="Ex: France"
+                                   attrs="{'invisible': [('auto_create_contacts', '=', False)]}"
+                                   help="Pays par défaut pour le formatage des numéros de téléphone"/>
+                        </group>
+
+                        <group name="sync_status" string="Statut de synchronisation">
+                            <field name="last_sync_date" readonly="1"/>
+                            <field name="last_sync_status" readonly="1" widget="badge"
+                                   decoration-success="last_sync_status == 'success'"
+                                   decoration-warning="last_sync_status == 'partial'"
+                                   decoration-danger="last_sync_status == 'failed'"/>
+                            <field name="last_sync_count" readonly="1"/>
+                            <field name="last_sync_message" readonly="1"
+                                   attrs="{'invisible': [('last_sync_message', '=', False)]}"/>
                         </group>
                     </group>
+
+                    <!-- Exemples et aide -->
+                    <notebook>
+                        <page string="Exemples de configuration" icon="fa-lightbulb-o">
+                            <div class="container">
+                                <h4><i class="fa fa-building"/> Configuration type - Petite entreprise</h4>
+                                <table class="table table-bordered">
+                                    <tr><td><strong>Hôte UCM</strong></td><td>192.168.1.100</td></tr>
+                                    <tr><td><strong>Port</strong></td><td>8089</td></tr>
+                                    <tr><td><strong>HTTPS</strong></td><td>Oui</td></tr>
+                                    <tr><td><strong>Vérifier SSL</strong></td><td>Non (certificat auto-signé)</td></tr>
+                                    <tr><td><strong>Intervalle sync</strong></td><td>15 minutes</td></tr>
+                                    <tr><td><strong>Jours à sync</strong></td><td>30 jours</td></tr>
+                                </table>
+
+                                <h4 class="mt-4"><i class="fa fa-building-o"/> Configuration type - Multi-sites</h4>
+                                <table class="table table-bordered">
+                                    <tr><td><strong>Hôte UCM</strong></td><td>ucm-paris.monentreprise.local</td></tr>
+                                    <tr><td><strong>Port</strong></td><td>8089</td></tr>
+                                    <tr><td><strong>HTTPS</strong></td><td>Oui</td></tr>
+                                    <tr><td><strong>Vérifier SSL</strong></td><td>Oui (certificat valide)</td></tr>
+                                    <tr><td><strong>Intervalle sync</strong></td><td>5 minutes</td></tr>
+                                    <tr><td><strong>Max appels/sync</strong></td><td>500</td></tr>
+                                </table>
+
+                                <div class="alert alert-warning mt-3">
+                                    <strong><i class="fa fa-exclamation-triangle"/> Conseils :</strong>
+                                    <ul class="mb-0">
+                                        <li>Pour plusieurs UCM (multi-sites), créez une configuration par serveur</li>
+                                        <li>Réduisez l'intervalle de sync (5 min) si vous avez besoin de données en temps réel</li>
+                                        <li>Augmentez-le (30 min) si votre UCM a une charge élevée</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </page>
+                        <page string="Dépannage" icon="fa-wrench">
+                            <div class="container">
+                                <h4><i class="fa fa-times-circle text-danger"/> Erreurs courantes</h4>
+
+                                <h5 class="mt-3">❌ "Connexion refusée"</h5>
+                                <ul>
+                                    <li>Vérifiez que l'adresse IP et le port sont corrects</li>
+                                    <li>Vérifiez que le pare-feu autorise la connexion</li>
+                                    <li>Testez l'accès : <code>curl https://[IP]:8089/api</code></li>
+                                </ul>
+
+                                <h5 class="mt-3">❌ "Authentification échouée"</h5>
+                                <ul>
+                                    <li>Vérifiez le nom d'utilisateur et mot de passe API</li>
+                                    <li>Assurez-vous que l'utilisateur API a les droits CDR</li>
+                                    <li>Dans le UCM : Maintenance &gt; Utilisateur API &gt; Vérifier les permissions</li>
+                                </ul>
+
+                                <h5 class="mt-3">❌ "Erreur SSL/Certificat"</h5>
+                                <ul>
+                                    <li>Si certificat auto-signé : Désactivez "Vérifier SSL"</li>
+                                    <li>Si certificat expiré : Renouvelez le certificat sur le UCM</li>
+                                </ul>
+
+                                <h5 class="mt-3">❌ "Timeout de synchronisation"</h5>
+                                <ul>
+                                    <li>Réduisez "Max appels par sync" (ex: 500)</li>
+                                    <li>Augmentez l'intervalle de synchronisation</li>
+                                    <li>Vérifiez la charge du serveur UCM</li>
+                                </ul>
+                            </div>
+                        </page>
+                    </notebook>
 
                 </sheet>
             </form>
@@ -69,16 +193,29 @@
 
     <!-- Grandstream Config Action -->
     <record id="action_grandstream_config" model="ir.actions.act_window">
-        <field name="name">UCM Configurations</field>
+        <field name="name">Serveurs UCM</field>
         <field name="res_model">grandstream.config</field>
         <field name="view_mode">tree,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                Configure your Grandstream UCM server
+                Configurez votre premier serveur Grandstream UCM
             </p>
             <p>
-                Set up the connection to your Grandstream UCM to start syncing call logs.
+                <strong>Étapes de configuration :</strong>
             </p>
+            <ol>
+                <li>Cliquez sur "Créer" pour ajouter un nouveau serveur UCM</li>
+                <li>Renseignez l'adresse IP de votre UCM (ex: 192.168.1.100)</li>
+                <li>Entrez les identifiants API (créés dans le UCM)</li>
+                <li>Testez la connexion puis lancez la synchronisation</li>
+            </ol>
+            <p class="mt-3">
+                <strong>Prérequis sur le Grandstream UCM :</strong>
+            </p>
+            <ul>
+                <li>API CDR activée (Valeur &gt; CDR &gt; CDR API)</li>
+                <li>Utilisateur API créé (Maintenance &gt; Utilisateur API)</li>
+            </ul>
         </field>
     </record>
 
