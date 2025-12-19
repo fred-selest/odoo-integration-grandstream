@@ -136,6 +136,47 @@ class GrandstreamConfig(models.Model):
         help='Maximum API requests per minute'
     )
 
+    # AMI Configuration for real-time call popup
+    ami_enabled = fields.Boolean(
+        string='Enable Real-time Call Popup (AMI)',
+        default=False,
+        help='Enable real-time contact popup using Asterisk Manager Interface'
+    )
+    ami_port = fields.Integer(
+        string='AMI Port',
+        default=5038,
+        help='Asterisk Manager Interface port (default: 5038)'
+    )
+    ami_username = fields.Char(
+        string='AMI Username',
+        help='AMI username (created on UCM)'
+    )
+    ami_password = fields.Char(
+        string='AMI Password',
+        password=True,
+        help='AMI password'
+    )
+    ami_monitor_status = fields.Selection([
+        ('stopped', 'Stopped'),
+        ('running', 'Running'),
+        ('error', 'Error')
+    ], string='AMI Monitor Status', readonly=True, default='stopped')
+    ami_last_event_date = fields.Datetime(
+        string='Last AMI Event',
+        readonly=True,
+        help='Date of last event received from AMI'
+    )
+    ami_error_message = fields.Text(
+        string='AMI Error Message',
+        readonly=True
+    )
+    company_id = fields.Many2one(
+        'res.company',
+        string='Company',
+        default=lambda self: self.env.company,
+        help='Company using this UCM configuration'
+    )
+
     _sql_constraints = [
         ('ucm_name_unique', 'unique(ucm_name)', 'UCM name must be unique!'),
     ]
@@ -168,6 +209,18 @@ class GrandstreamConfig(models.Model):
         for record in self:
             if record.days_to_sync < 1:
                 raise ValidationError(_('Days to sync must be at least 1'))
+
+    @api.constrains('ami_port')
+    def _check_ami_port(self):
+        for record in self:
+            if record.ami_enabled and (record.ami_port < 1 or record.ami_port > 65535):
+                raise ValidationError(_('AMI port must be between 1 and 65535'))
+
+    @api.constrains('ami_enabled', 'ami_username', 'ami_password')
+    def _check_ami_credentials(self):
+        for record in self:
+            if record.ami_enabled and (not record.ami_username or not record.ami_password):
+                raise ValidationError(_('AMI username and password are required when AMI is enabled'))
 
     def get_api_url(self):
         """Generate base API URL"""
@@ -261,6 +314,117 @@ class GrandstreamConfig(models.Model):
             }
 
         raise UserError(_('Connection failed: Invalid credentials or UCM not reachable'))
+
+    def test_ami_connection(self):
+        """Test AMI connection to Grandstream UCM"""
+        self.ensure_one()
+
+        if not self.ami_enabled:
+            raise UserError(_('AMI is not enabled for this configuration'))
+
+        if not self.ami_username or not self.ami_password:
+            raise UserError(_('AMI username and password are required'))
+
+        import socket
+        import time
+
+        try:
+            # Créer une connexion socket au port AMI
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(10)
+
+            _logger.info(f'Testing AMI connection to {self.ucm_host}:{self.ami_port}')
+            sock.connect((self.ucm_host, self.ami_port))
+
+            # Lire le banner Asterisk
+            banner = sock.recv(1024).decode('utf-8', errors='ignore')
+            _logger.info(f'Received AMI banner: {banner}')
+
+            if 'Asterisk Call Manager' not in banner:
+                sock.close()
+                raise UserError(_('AMI connection failed: Invalid response from server'))
+
+            # Envoyer la commande Login
+            login_cmd = f"Action: Login\r\nUsername: {self.ami_username}\r\nSecret: {self.ami_password}\r\n\r\n"
+            sock.send(login_cmd.encode('utf-8'))
+
+            # Attendre la réponse
+            time.sleep(0.5)
+            response = sock.recv(4096).decode('utf-8', errors='ignore')
+            _logger.info(f'AMI login response: {response}')
+
+            # Envoyer Logoff
+            logoff_cmd = "Action: Logoff\r\n\r\n"
+            sock.send(logoff_cmd.encode('utf-8'))
+            time.sleep(0.3)
+            sock.close()
+
+            if 'Success' in response:
+                return {
+                    'type': 'ir.actions.client',
+                    'tag': 'display_notification',
+                    'params': {
+                        'title': _('AMI Connection Successful'),
+                        'message': _('Successfully connected to Asterisk Manager Interface!'),
+                        'type': 'success',
+                        'sticky': False,
+                    }
+                }
+            else:
+                raise UserError(_('AMI Authentication failed: Invalid username or password'))
+
+        except socket.timeout:
+            raise UserError(_('AMI Connection timeout: Check if port %s is accessible') % self.ami_port)
+        except socket.error as e:
+            raise UserError(_('AMI Connection error: %s') % str(e))
+        except Exception as e:
+            _logger.error(f'AMI connection test failed: {str(e)}', exc_info=True)
+            raise UserError(_('AMI Connection test failed: %s') % str(e))
+
+    def action_start_ami_monitor(self):
+        """Start AMI monitoring service"""
+        self.ensure_one()
+
+        if not self.ami_enabled:
+            raise UserError(_('AMI is not enabled. Please enable it in configuration.'))
+
+        # Lancer le service de monitoring
+        ami_monitor = self.env['grandstream.ami.monitor'].sudo()
+        ami_monitor.start_monitor(self.id)
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('AMI Monitor Started'),
+                'message': _('Real-time call monitoring is now active'),
+                'type': 'success',
+                'sticky': False,
+            }
+        }
+
+    def action_stop_ami_monitor(self):
+        """Stop AMI monitoring service"""
+        self.ensure_one()
+
+        # Arrêter le service de monitoring
+        ami_monitor = self.env['grandstream.ami.monitor'].sudo()
+        ami_monitor.stop_monitor(self.id)
+
+        self.write({
+            'ami_monitor_status': 'stopped'
+        })
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('AMI Monitor Stopped'),
+                'message': _('Real-time call monitoring has been stopped'),
+                'type': 'info',
+                'sticky': False,
+            }
+        }
 
     def action_sync_calls(self):
         """Manually trigger call synchronization"""

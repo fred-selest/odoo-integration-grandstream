@@ -120,6 +120,68 @@
 
                     <!-- Exemples et aide -->
                     <notebook>
+                        <page string="Remontée de fiche temps réel (AMI)" icon="fa-phone">
+                            <div class="alert alert-info" role="alert">
+                                <strong><i class="fa fa-info-circle"/> À propos de la remontée de fiche temps réel :</strong>
+                                <p class="mb-0 mt-2">
+                                    Le module de remontée de fiche utilise Asterisk Manager Interface (AMI) pour détecter
+                                    les appels en temps réel et afficher automatiquement la fiche du contact.
+                                    <br/><strong>Prérequis :</strong> L'AMI doit être activé sur votre UCM6301.
+                                </p>
+                            </div>
+
+                            <group>
+                                <group string="Configuration AMI">
+                                    <field name="ami_enabled" widget="boolean_toggle"/>
+                                    <field name="ami_port"
+                                           attrs="{'invisible': [('ami_enabled', '=', False)], 'required': [('ami_enabled', '=', True)]}"/>
+                                    <field name="ami_username"
+                                           placeholder="Ex: odoo"
+                                           attrs="{'invisible': [('ami_enabled', '=', False)], 'required': [('ami_enabled', '=', True)]}"/>
+                                    <field name="ami_password" password="True"
+                                           placeholder="Mot de passe AMI"
+                                           attrs="{'invisible': [('ami_enabled', '=', False)], 'required': [('ami_enabled', '=', True)]}"/>
+                                </group>
+
+                                <group string="Statut">
+                                    <field name="ami_monitor_status" widget="badge"
+                                           decoration-success="ami_monitor_status == 'running'"
+                                           decoration-warning="ami_monitor_status == 'stopped'"
+                                           decoration-danger="ami_monitor_status == 'error'"
+                                           attrs="{'invisible': [('ami_enabled', '=', False)]}"/>
+                                    <field name="ami_last_event_date"
+                                           attrs="{'invisible': [('ami_enabled', '=', False)]}"/>
+                                    <field name="ami_error_message"
+                                           attrs="{'invisible': [('ami_error_message', '=', False)]}"/>
+                                </group>
+                            </group>
+
+                            <div class="mt-3" attrs="{'invisible': [('ami_enabled', '=', False)]}">
+                                <button name="test_ami_connection" type="object" string="Tester la connexion AMI"
+                                        class="btn-primary" icon="fa-plug"/>
+                                <button name="action_start_ami_monitor" type="object" string="Démarrer le monitoring"
+                                        class="btn-success" icon="fa-play"
+                                        attrs="{'invisible': [('ami_monitor_status', '=', 'running')]}"/>
+                                <button name="action_stop_ami_monitor" type="object" string="Arrêter le monitoring"
+                                        class="btn-warning" icon="fa-stop"
+                                        attrs="{'invisible': [('ami_monitor_status', '!=', 'running')]}"/>
+                            </div>
+
+                            <div class="alert alert-warning mt-3">
+                                <strong><i class="fa fa-exclamation-triangle"/> Guide d'installation :</strong>
+                                <ol class="mb-0 mt-2">
+                                    <li>Copiez le script <code>scripts/ucm/configure_ami.sh</code> sur votre UCM via SSH</li>
+                                    <li>Exécutez : <code>./configure_ami.sh "VotreMotDePasse" "IP_ODOO/255.255.255.255"</code></li>
+                                    <li>Notez les informations de connexion affichées</li>
+                                    <li>Activez l'AMI ci-dessus et entrez les informations</li>
+                                    <li>Testez la connexion puis démarrez le monitoring</li>
+                                </ol>
+                                <p class="mt-2 mb-0">
+                                    <strong>Documentation complète :</strong> <code>scripts/ucm/README_AMI.md</code>
+                                </p>
+                            </div>
+                        </page>
+
                         <page string="Exemples de configuration" icon="fa-lightbulb-o">
                             <div class="container">
                                 <h4><i class="fa fa-building"/> Configuration type - Petite entreprise</h4>
